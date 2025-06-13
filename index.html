@@ -98,6 +98,7 @@
 
       navigator.clipboard.writeText(resultado).then(() => {
         alert("Texto formatado e copiado com sucesso!");
+        document.getElementById("inputText").value = '';
       }).catch(err => {
         console.error("Erro ao copiar:", err);
         alert("Não foi possível copiar automaticamente.");
