@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <h2>Formatador</h2>
+  <h2 class="">Formatador</h2>
 
   <textarea id="inputText" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
   <br>
@@ -54,13 +54,23 @@
         return `__URL${urls.length - 1}__`;
       });
 
-      // Divide em linhas e remove linhas em branco
+      // Divide o texto em linhas e remove linhas em branco
       let linhas = texto.split('\n').filter(linha => linha.trim() !== '');
 
-      // Processa e aplica espaçamento
+      // Remove "Veja grade curricular" e as 12 linhas seguintes
+      for (let i = 0; i < linhas.length; i++) {
+        if (/veja grade curricular/i.test(linhas[i])) {
+          linhas.splice(i, 13);
+          i--;
+        }
+      }
+
+      // Processa cada linha individualmente e aplica espaçamento
       let resultado = '';
       for (let i = 0; i < linhas.length; i++) {
         const linhaAtual = linhas[i].trim();
+        if (linhaAtual === '') continue;
+
         resultado += linhaAtual;
 
         const proxima = linhas[i + 1] ? linhas[i + 1].trim() : '';
@@ -71,34 +81,32 @@
         }
       }
 
-      // Restaura URLs
-      urls.forEach((url, i) => {
-        resultado = resultado.replace(`__URL${i}__`, url);
-      });
+      // Regra 2: Remove frases indesejadas
+      resultado = resultado.replace(/Inscreva-se Gratuitamente\s*/gi, '');
 
-      // Regra 1: Reduz espaçamento após termos específicos
-      const expressoes = [
+      // Regra 1: Remove uma linha após certos elementos
+      const termos = [
         "por:",
         "Matrícula",
         "Oportunidade de desconto",
         "Total de parcelas",
         "Valor da proposta válido para"
       ];
+      for (const termo of termos) {
+        const regex = new RegExp(`(${termo}.*?)(\\n\\n\\n|\\n)`, 'gi');
+        resultado = resultado.replace(regex, '$1\n');
+      }
 
-      expressoes.forEach(expr => {
-        const regex = new RegExp(`(${expr.trim()}.*)\\n\\n\\n`, 'gi');
-        resultado = resultado.replace(regex, '$1\n\n');
+      // Restaura URLs
+      urls.forEach((url, i) => {
+        resultado = resultado.replace(`__URL${i}__`, url);
       });
 
-      // Regra 2: Remove "Inscreva-se Gratuitamente"
-      resultado = resultado.replace(/Inscreva-se Gratuitamente\s*/gi, '');
-      resultado = resultado.replace(/Veja grade curricular\s*/gi, '');
-      // Exibe e copia
       document.getElementById("outputText").value = resultado;
+      document.getElementById("inputText").value = ''; // limpa a entrada
 
       navigator.clipboard.writeText(resultado).then(() => {
         alert("Texto formatado e copiado com sucesso!");
-        document.getElementById("inputText").value = '';
       }).catch(err => {
         console.error("Erro ao copiar:", err);
         alert("Não foi possível copiar automaticamente.");
