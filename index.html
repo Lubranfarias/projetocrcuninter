@@ -92,7 +92,7 @@
 
       // Regra 2: Remove "Inscreva-se Gratuitamente"
       resultado = resultado.replace(/Inscreva-se Gratuitamente\s*/gi, '');
-
+      resultado = resultado.replace(/Veja grade curricular\s*/gi, '');
       // Exibe e copia
       document.getElementById("outputText").value = resultado;
 
