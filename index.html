@@ -64,11 +64,20 @@
       for (let i = 0; i < linhas.length; i++) {
         if (/veja grade curricular/i.test(linhas[i])) {
           linhas.splice(i, 13); // remove linha + 12 próximas
-          i--; // volta para verificar de novo no mesmo índice
+          i--;
         }
       }
 
-      // Aplica espaçamento normal entre blocos
+      // Termos da Regra 1
+      const termosRegra1 = [
+        'por:',
+        'matrícula',
+        'oportunidade de desconto',
+        'total de parcelas',
+        'valor da proposta válido para'
+      ];
+
+      // Aplica espaçamento com regras
       let resultado = '';
       for (let i = 0; i < linhas.length; i++) {
         const linhaAtual = linhas[i].trim();
@@ -77,7 +86,11 @@
         resultado += linhaAtual;
 
         const proxima = linhas[i + 1] ? linhas[i + 1].trim() : '';
-        if (/[.!?:]$/.test(linhaAtual) || (linhaAtual !== '' && proxima !== '')) {
+        const linhaMinuscula = linhaAtual.toLowerCase();
+
+        if (termosRegra1.includes(linhaMinuscula)) {
+          resultado += '\n\n'; // Regra 1: 2 quebras de linha
+        } else if (/[.!?:]$/.test(linhaAtual) || (linhaAtual !== '' && proxima !== '')) {
           resultado += '\n\n\n';
         } else {
           resultado += '\n';
