@@ -35,7 +35,7 @@
   </style>
 </head>
 <body>
-  <h2 class="">Formatador</h2>
+  <h2>Formatador</h2>
 
   <textarea id="inputText" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
   <br>
@@ -54,18 +54,21 @@
         return `__URL${urls.length - 1}__`;
       });
 
-      // Divide o texto em linhas e remove linhas em branco
-      let linhas = texto.split('\n').filter(linha => linha.trim() !== '');
+      // Divide o texto em linhas e remove linhas vazias
+      let linhas = texto.split('\n').filter(l => l.trim() !== '');
 
-      // Remove "Veja grade curricular" e as 12 linhas seguintes
+      // Remove "Inscreva-se Gratuitamente"
+      linhas = linhas.filter(l => !/inscreva-se gratuitamente/i.test(l));
+
+      // Remove "Veja grade curricular" + 12 linhas seguintes
       for (let i = 0; i < linhas.length; i++) {
         if (/veja grade curricular/i.test(linhas[i])) {
-          linhas.splice(i, 13);
-          i--;
+          linhas.splice(i, 13); // remove linha + 12 próximas
+          i--; // volta para verificar de novo no mesmo índice
         }
       }
 
-      // Processa cada linha individualmente e aplica espaçamento
+      // Aplica espaçamento normal entre blocos
       let resultado = '';
       for (let i = 0; i < linhas.length; i++) {
         const linhaAtual = linhas[i].trim();
@@ -81,29 +84,14 @@
         }
       }
 
-      // Regra 2: Remove frases indesejadas
-      resultado = resultado.replace(/Inscreva-se Gratuitamente\s*/gi, '');
-
-      // Regra 1: Remove uma linha após certos elementos
-      const termos = [
-        "por:",
-        "Matrícula",
-        "Oportunidade de desconto",
-        "Total de parcelas",
-        "Valor da proposta válido para"
-      ];
-      for (const termo of termos) {
-        const regex = new RegExp(`(${termo}.*?)(\\n\\n\\n|\\n)`, 'gi');
-        resultado = resultado.replace(regex, '$1\n');
-      }
-
       // Restaura URLs
       urls.forEach((url, i) => {
         resultado = resultado.replace(`__URL${i}__`, url);
       });
 
+      // Atualiza interface
       document.getElementById("outputText").value = resultado;
-      document.getElementById("inputText").value = ''; // limpa a entrada
+      document.getElementById("inputText").value = ''; // limpa entrada
 
       navigator.clipboard.writeText(resultado).then(() => {
         alert("Texto formatado e copiado com sucesso!");
