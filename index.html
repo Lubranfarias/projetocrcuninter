@@ -54,27 +54,21 @@
         return `__URL${urls.length - 1}__`;
       });
 
-      // Divide o texto em linhas e remove linhas vazias
+      // Divide o texto em linhas e remove vazias
       let linhas = texto.split('\n').filter(l => l.trim() !== '');
 
       // Remove "Inscreva-se Gratuitamente"
       linhas = linhas.filter(l => !/inscreva-se gratuitamente/i.test(l));
 
-      // Remove tudo entre "Veja grade curricular" e "Continuar" (inclusive ambos)
-      let inicio = -1;
-      let fim = -1;
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i].trim().toLowerCase();
-        if (inicio === -1 && linha.includes("veja grade curricular")) {
-          inicio = i;
-        }
-        if (inicio !== -1 && linha.includes("continuar")) {
-          fim = i;
-          break;
-        }
-      }
+      // Remove trecho entre "Veja grade curricular" e "Continuar", preservando "Mensalidade"
+      const inicio = linhas.findIndex(l => l.toLowerCase().includes("veja grade curricular"));
+      const fim = linhas.findIndex((l, i) => i > inicio && l.toLowerCase().includes("continuar"));
+
       if (inicio !== -1 && fim !== -1 && fim > inicio) {
-        linhas.splice(inicio, fim - inicio + 1);
+        const antes = linhas.slice(0, inicio);
+        const depois = linhas.slice(fim + 1);
+        const preservadas = linhas.slice(inicio, fim + 1).filter(l => l.trim().toLowerCase() === 'mensalidade');
+        linhas = [...antes, ...preservadas, ...depois];
       }
 
       // Termos da Regra 1
@@ -98,7 +92,7 @@
         const linhaMinuscula = linhaAtual.toLowerCase();
 
         if (termosRegra1.includes(linhaMinuscula)) {
-          resultado += '\n\n'; // Regra 1: 2 quebras de linha
+          resultado += '\n\n';
         } else if (/[.!?:]$/.test(linhaAtual) || (linhaAtual !== '' && proxima !== '')) {
           resultado += '\n\n\n';
         } else {
@@ -113,7 +107,7 @@
 
       // Atualiza interface
       document.getElementById("outputText").value = resultado;
-      document.getElementById("inputText").value = ''; // limpa entrada
+      document.getElementById("inputText").value = '';
 
       navigator.clipboard.writeText(resultado).then(() => {
         alert("Texto formatado e copiado com sucesso!");
