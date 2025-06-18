@@ -60,12 +60,21 @@
       // Remove "Inscreva-se Gratuitamente"
       linhas = linhas.filter(l => !/inscreva-se gratuitamente/i.test(l));
 
-      // Remove "Veja grade curricular" + 12 linhas seguintes
+      // Remove tudo entre "Veja grade curricular" e "Continuar" (inclusive ambos)
+      let inicio = -1;
+      let fim = -1;
       for (let i = 0; i < linhas.length; i++) {
-        if (/veja grade curricular/i.test(linhas[i])) {
-          linhas.splice(i, 13); // remove linha + 12 próximas
-          i--;
+        const linha = linhas[i].trim().toLowerCase();
+        if (inicio === -1 && linha.includes("veja grade curricular")) {
+          inicio = i;
         }
+        if (inicio !== -1 && linha.includes("continuar")) {
+          fim = i;
+          break;
+        }
+      }
+      if (inicio !== -1 && fim !== -1 && fim > inicio) {
+        linhas.splice(inicio, fim - inicio + 1);
       }
 
       // Termos da Regra 1
