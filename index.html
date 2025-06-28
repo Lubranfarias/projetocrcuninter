@@ -1,121 +1,157 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Formatador</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #282424;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      background-color: rgb(218, 238, 255);
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #outputText {
-      width: 100%;
-      height: 300px;
-      padding: 12px;
-      font-size: 14px;
-      font-family: 'Trebuchet MS', tahoma, verdana, helvetica;
-      background-color: rgb(218, 238, 255);
-      white-space: pre-wrap;
-      border: 1px solid #ccc;
-      margin-top: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Formatador</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #282424;
+    color: white;
+  }
+  textarea {
+    width: 100%;
+    padding: 12px;
+    background-color: rgb(218, 238, 255);
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  label { 
+    display: inline-block; 
+    margin: 10px 0; 
+  }
+  #outputText {
+    width: 100%;
+    height: 300px;
+    padding: 12px;
+    font-size: 14px;
+    background-color: rgb(218, 238, 255);
+    white-space: pre-wrap;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+  }
+</style>
 </head>
 <body>
-  <h2>Formatador</h2>
+<h2>Formatador</h2>
+<label><input type="checkbox" id="usarNotaEnem" /> Usar nota do ENEM</label>
+<textarea id="inputText" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
+<br>
+<button onclick="aplicarFormatacao()">Aplicar Espaçamento e Copiar</button>
+<textarea id="outputText" readonly></textarea>
 
-  <textarea id="inputText" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
-  <br>
-  <button onclick="aplicarFormatacao()">Aplicar Espaçamento e Copiar</button>
+<script>
+function aplicarFormatacao() {
+  let texto = document.getElementById('inputText').value;
 
-  <textarea id="outputText" readonly></textarea>
+  const urls = [];
+  texto = texto.replace(/\bhttps?:\/\/[^\s]+/gi, (m) => { 
+    urls.push(m); 
+    return `__URL${urls.length-1}__`; 
+  });
 
-  <script>
-    function aplicarFormatacao() {
-      let texto = document.getElementById("inputText").value;
+  let linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
+  linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
 
-      // Protege URLs temporariamente
-      const urls = [];
-      texto = texto.replace(/\b(?:https?:\/\/)?(?:www\.)?[^\s]+\.[^\s]{2,}/gi, (match) => {
-        urls.push(match);
-        return `__URL${urls.length - 1}__`;
-      });
+  const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
+  const iCont = linhas.findIndex(l => /^continuar$/i.test(l));
+  if (iCurr !== -1 && iCont !== -1) {
+    linhas.splice(iCurr, iCont - iCurr + 1);
+  }
 
-      // Divide o texto em linhas e remove vazias
-      let linhas = texto.split('\n').filter(l => l.trim() !== '');
+  let faixas = [];
+  if (document.getElementById('usarNotaEnem').checked) {
+    const inicioTabela = linhas.findIndex(l => l.includes('Na matrícula'));
+    const fimTabela = linhas.findIndex(l => l.includes('Total de parcelas'));
+    if (inicioTabela !== -1 && fimTabela !== -1) {
+      const tabela = linhas.slice(inicioTabela, fimTabela).join('\n');
+      const blocosFaixas = tabela.split(/\n(?=Até|De|A partir)/i).filter(Boolean);
+      blocosFaixas.forEach(bloco => {
+        let min = 0, max = Infinity;
+        const numeros = bloco.match(/\d+(?:[.,]\d+)?/g)?.map(n => parseFloat(n.replace(',', '.'))) || [];
 
-      // Remove "Inscreva-se Gratuitamente"
-      linhas = linhas.filter(l => !/inscreva-se gratuitamente/i.test(l));
-
-      // Remove trecho entre "Veja grade curricular" e "Continuar", preservando "Mensalidade"
-      const inicio = linhas.findIndex(l => l.toLowerCase().includes("veja grade curricular"));
-      const fim = linhas.findIndex((l, i) => i > inicio && l.toLowerCase().includes("continuar"));
-
-      if (inicio !== -1 && fim !== -1 && fim > inicio) {
-        const antes = linhas.slice(0, inicio);
-        const depois = linhas.slice(fim + 1);
-        const preservadas = linhas.slice(inicio, fim + 1).filter(l => l.trim().toLowerCase() === 'mensalidade');
-        linhas = [...antes, ...preservadas, ...depois];
-      }
-
-      // Termos da Regra 1
-      const termosRegra1 = [
-        'por:',
-        'matrícula',
-        'oportunidade de desconto',
-        'total de parcelas',
-        'valor da proposta válido para'
-      ];
-
-      // Aplica espaçamento com regras
-      let resultado = '';
-      for (let i = 0; i < linhas.length; i++) {
-        const linhaAtual = linhas[i].trim();
-        if (linhaAtual === '') continue;
-
-        resultado += linhaAtual;
-
-        const proxima = linhas[i + 1] ? linhas[i + 1].trim() : '';
-        const linhaMinuscula = linhaAtual.toLowerCase();
-
-        if (termosRegra1.includes(linhaMinuscula)) {
-          resultado += '\n\n';
-        } else if (/[.!?:]$/.test(linhaAtual) || (linhaAtual !== '' && proxima !== '')) {
-          resultado += '\n\n\n';
-        } else {
-          resultado += '\n';
+        if (/Até/i.test(bloco)) {
+          max = numeros[0];
+        } else if (/De/i.test(bloco) && /a/i.test(bloco)) {
+          min = numeros[0];
+          max = numeros[1];
+        } else if (/A partir/i.test(bloco)) {
+          min = numeros[0];
         }
-      }
 
-      // Restaura URLs
-      urls.forEach((url, i) => {
-        resultado = resultado.replace(`__URL${i}__`, url);
+        let descontoPrincipal = bloco.match(/Bolsa de\s+(\d{1,3}(?:[.,]\d{1,2})?)%/i)?.[1];
+        if (!descontoPrincipal) {
+          descontoPrincipal = bloco.match(/(\d{1,3}(?:[.,]\d{1,2})?)%/)?.[1] || "0,00";
+        }
+        descontoPrincipal = descontoPrincipal.replace('.', ',');
+
+        const valorPontualidade = bloco.match(/R\$ (\d{1,3}(?:[.,]\d{2})?)$/m)?.[1] || "0,00";
+
+        faixas.push({
+          min,
+          max,
+          valorPontualidade,
+          descontoBolsa: descontoPrincipal
+        });
       });
 
-      // Atualiza interface
-      document.getElementById("outputText").value = resultado;
-      document.getElementById("inputText").value = '';
-
-      navigator.clipboard.writeText(resultado).then(() => {
-        alert("Texto formatado e copiado com sucesso!");
-      }).catch(err => {
-        console.error("Erro ao copiar:", err);
-        alert("Não foi possível copiar automaticamente.");
-      });
+      linhas.splice(inicioTabela, fimTabela - inicioTabela);
     }
-  </script>
+
+    const nota = parseInt(prompt('Qual a nota da redação?'));
+    let faixa = faixas.find(f => nota >= f.min && nota <= f.max);
+
+    
+    if (!faixa) {
+      const maiorFaixa = faixas.reduce((prev, curr) => (curr.min > prev.min ? curr : prev), { min: 0 });
+      if (nota > maiorFaixa.min) {
+        faixa = {
+          min: nota,
+          max: nota,
+          valorPontualidade: "0,00",
+          descontoBolsa: "100,00"
+        };
+      }
+    }
+
+    if (faixa) {
+      const indexPor = linhas.findIndex(l => l.trim().toLowerCase().startsWith('por:'));
+      if (indexPor !== -1) {
+        linhas[indexPor + 1] = `R$ ${faixa.valorPontualidade}`;
+        linhas.splice(indexPor + 2, 0, `Bolsa de ${faixa.descontoBolsa}% em nota do ENEM`);
+      }
+    }
+  }
+
+  const termosRegra1 = ['por:', 'matrícula', 'oportunidade de desconto', 'total de parcelas', 'valor da proposta válido para'];
+  let resultado = '';
+  for (let i = 0; i < linhas.length; i++) {
+    const linhaAtual = linhas[i].trim();
+    if (!linhaAtual) continue;
+    resultado += linhaAtual;
+    const proxima = linhas[i + 1]?.trim() || '';
+    if (termosRegra1.includes(linhaAtual.toLowerCase()) || /[.!?:]$/.test(linhaAtual)) {
+      resultado += '\n\n';
+    } else if (proxima) {
+      resultado += '\n\n\n';
+    } else {
+      resultado += '\n';
+    }
+  }
+
+  urls.forEach((url, i) => resultado = resultado.replace(`__URL${i}__`, url));
+  document.getElementById('outputText').value = resultado;
+  document.getElementById('inputText').value = '';
+  navigator.clipboard.writeText(resultado)
+    .then(() => alert('Texto formatado e copiado com sucesso!'));
+}
+</script>
 </body>
 </html>
