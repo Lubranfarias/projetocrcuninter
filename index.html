@@ -151,6 +151,13 @@
             box-shadow: 0 6px 12px rgba(224, 169, 0, 0.4);
         }
 
+        #btnTextosAplicar:hover, #btnTextosAplicar.ativo {
+            background-color: #fcb415;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(224, 169, 0, 0.4);
+        }
+
         #btnBloco:hover, #btnBloco.ativo {
             background-color: #2ccc7c;
             color: #fff;
@@ -166,6 +173,20 @@
         }
 
         #btnFraseologiaGerar:hover, #btnFraseologiaGerar.ativo {
+            background-color: #9d00ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(157, 0, 255, 0.4);
+        }
+
+        #btnCopiarF1:hover, #btnCopiarF1.ativo {
+            background-color: #9d00ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(157, 0, 255, 0.4);
+        }
+
+        #btnCopiarF2:hover, #btnCopiarF2.ativo {
             background-color: #9d00ff;
             color: #fff;
             transform: translateY(-2px);
@@ -464,13 +485,13 @@
             <div class="frase mt-6">
                 <label for="frase1" class="block font-semibold text-base md:text-lg mb-2"><strong>Fraseologia de matrícula:</strong></label>
                 <textarea class="rounded-md text-base md:text-lg w-full" id="frase1" rows="3" readonly></textarea>
-                <button class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase1')">Copiar Fraseologia</button>
+                <button id="btnCopiarF1" class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase1')">Copiar Fraseologia</button>
             </div>
             
             <div class="frase mt-6">
                 <label for="frase2" class="block font-semibold text-base md:text-lg mb-2"><strong>Registro CRM:</strong></label>
                 <textarea class="rounded-md text-base md:text-lg w-full" id="frase2" rows="4" readonly></textarea>
-                <button class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase2')">Copiar Fraseologia</button>
+                <button id="btnCopiarF2" class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase2')">Copiar Fraseologia</button>
             </div>
         </div>
 
