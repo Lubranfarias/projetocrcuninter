@@ -1,157 +1,977 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<title>Formatador</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background-color: #282424;
-    color: white;
-  }
-  textarea {
-    width: 100%;
-    padding: 12px;
-    background-color: rgb(218, 238, 255);
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  label { 
-    display: inline-block; 
-    margin: 10px 0; 
-  }
-  #outputText {
-    width: 100%;
-    height: 300px;
-    padding: 12px;
-    font-size: 14px;
-    background-color: rgb(218, 238, 255);
-    white-space: pre-wrap;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-  }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formatador</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+            padding: 20px;
+            background-color: #282424;
+            color: white;
+        }
+        
+        /* Responsividade para textarea */
+        textarea {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+            width: 100%;
+            padding: 12px;
+            background-color: rgb(218, 238, 255);
+            margin-bottom: 10px;
+            color: black;
+            resize: vertical;
+        }
+        
+        /* Responsividade para botões */
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            min-height: 44px; /* Touch target mínimo */
+        }
+        
+        /* Botões modo padrão responsivos */
+        .modoBtn {
+            background-color: #444;
+            color: white;
+            padding: 10px 16px;
+            margin-right: 8px;
+            margin-bottom: 8px; /* Espaço para quebra de linha em mobile */
+            border-radius: 6px;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            flex: 1; /* Distribui igualmente em mobile */
+            min-width: 120px;
+        }
+        
+        /* Container de botões responsivo */
+        #botoesModo {
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        /* Media queries para mobile */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                font-size: 14px;
+            }
+            
+            .modoBtn {
+                font-size: 14px;
+                padding: 12px 8px;
+                margin-right: 0;
+                flex: 1;
+                min-width: auto;
+            }
+            
+            #botoesModo {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            textarea {
+                font-size: 14px;
+                padding: 10px;
+            }
+            
+            button {
+                font-size: 14px;
+                padding: 12px 16px;
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .btn-base {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            h3 {
+                font-size: 1.5rem !important;
+                text-align: center;
+            }
+            
+            /* Input de nota ENEM responsivo */
+            #notaEnem {
+                width: 100% !important;
+                margin-top: 10px;
+                padding: 10px;
+            }
+            
+            /* Preview Excel responsivo */
+            #previewExcel {
+                overflow-x: auto;
+                font-size: 12px;
+            }
+            
+            #previewExcel table {
+                min-width: 300px;
+            }
+        }
+        
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #botoesModo {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .modoBtn {
+                margin-right: 0;
+            }
+        }
+        
+        /* Desktop grande */
+        @media (min-width: 1025px) {
+            #botoesModo {
+                justify-content: flex-start;
+            }
+        }
+
+        /* Hover individual com cor característica */
+        #btnTextos:hover, #btnTextos.ativo {
+            background-color: #fcb415;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(224, 169, 0, 0.4);
+        }
+
+        #btnBloco:hover, #btnBloco.ativo {
+            background-color: #2ccc7c;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(37, 182, 109, 0.4);
+        }
+
+        #btnFraseologia:hover, #btnFraseologia.ativo {
+            background-color: #9d00ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(157, 0, 255, 0.4);
+        }
+
+        #btnFraseologiaGerar:hover, #btnFraseologiaGerar.ativo {
+            background-color: #9d00ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(157, 0, 255, 0.4);
+        }
+
+        #btnSufixo:hover, #btnSufixo.ativo {
+            background-color: #ff6700;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(255, 103, 0, 0.4);
+        }
+
+        #btnFormatador:hover, #btnFormatador.ativo {
+            background-color: #0080ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 111, 214, 0.4);
+        }
+
+        #btnFormatadorAplicar:hover, #btnFormatadorAplicar.ativo {
+            background-color: #0080ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 111, 214, 0.4);
+        }
+
+        #usarNotaEnem:hover, #usarNotaEnem.ativo {
+            background-color: #0080ff;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 111, 214, 0.4);
+        }
+
+        label {
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        #outputText {
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+            width: 100%;
+            height: 300px;
+            padding: 12px;
+            font-size: 14px;
+            background-color: rgb(218, 238, 255);
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            color: black;
+        }
+
+        #notaEnem {
+            margin-left: 10px;
+            padding: 5px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        #containerPadrao, #containerSimplificado, #blocoNotas, #fraseologiaContainer, #containerSufixo {
+            display: none;
+        }
+
+        #blocoNotas textarea {
+            height: 500px;
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        /* Cores de fundo por modo */
+        .modo-Simplificado #inputSimplificado, .modo-Simplificado #outputSimplificado {
+            background-color: #fff9e3;
+            color: black;
+        }
+
+        .modo-Bloco #notas {
+            background-color: #e5f9f0;
+            color: black;
+        }
+
+        .modo-Fraseologia #inputDados, .modo-Fraseologia #frase1, .modo-Fraseologia #frase2 {
+            background-color: #f5e6ff;
+            color: black;
+        }
+
+        .modo-Formatador #inputText, .modo-Formatador #outputText {
+            background-color: rgb(218, 238, 255);
+            color: black;
+        }
+
+        .modo-Sufixo #inputSufixo, .modo-Sufixo #outputSufixo {
+            background-color: #fff1e6;
+            color: black;
+        }
+
+        .modo-Sufixo .inputSufixo.metodologia {
+            background-color: #e8f9ff;
+            color: black;
+        }
+
+        .modo-Sufixo .inputSufixo.inicioAulas {
+            background-color: #f1e9ff;
+            color: black;
+        }
+
+        .modo-Sufixo .inputSufixo.primeiraMensalidade {
+            background-color: #e9f7f4;
+            color: black;
+        }
+
+        .btn-base {
+            background-color: #444;
+            color: white;
+            padding: 10px 16px;
+            margin-right: 8px;
+            border-radius: 6px;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Botões específicos com responsividade */
+        .btn-profissionalizante:hover, .btn-profissionalizante.ativo {
+            color: #FF8C42;
+            background-color: #7844fc;
+            box-shadow: 0 0 12px rgba(255, 140, 66, 0.7), 0 0 24px rgba(255, 140, 66, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-tecnicoEAD:hover, .btn-tecnicoEAD.ativo {
+            color: #4ef037;
+            background-color: #6a0572;
+            box-shadow: 0 0 12px rgba(78, 240, 55, 0.7), 0 0 24px rgba(120, 255, 120, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-tecnicoSemi:hover, .btn-tecnicoSemi.ativo {
+            color: #fcbf49;
+            background-color: #228b22;
+            box-shadow: 0 0 12px rgba(252, 191, 73, 0.7), 0 0 24px rgba(255, 220, 150, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-graduacao-ead:hover, .btn-graduacao-ead.ativo {
+            color: #00FFFF;
+            background-color: #001F54;
+            box-shadow: 0 0 12px rgba(0, 200, 255, 0.7), 0 0 24px rgba(0, 200, 255, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-graduacao-semi:hover, .btn-graduacao-semi.ativo {
+            color: #FFD700;
+            background-color: #0077FF;
+            box-shadow: 0 0 12px rgba(255, 200, 50, 0.7), 0 0 24px rgba(255, 200, 50, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-graduacao-pres:hover, .btn-graduacao-pres.ativo {
+            color: #00FFD5;
+            background-color: #7844fc;
+            box-shadow: 0 0 12px rgba(0, 255, 213, 0.7), 0 0 24px rgba(0, 255, 213, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        .btn-pos:hover, .btn-pos.ativo {
+            color: #FFFF42;
+            background-color: #FF4D4D;
+            box-shadow: 0 0 12px rgba(255, 255, 66, 0.7), 0 0 24px rgba(255, 255, 66, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+        #previewExcel {
+            margin-top: 10px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-width: 100%;
+        }
+        
+        /* Container de sufixo responsivo */
+        #containerSufixo {
+            padding: 16px;
+        }
+        
+        /* Botões de sufixo responsivos */
+        .sufixo-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .sufixo-buttons {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .btn-section {
+                font-size: 14px !important;
+                padding: 12px 8px !important;
+                text-align: center;
+            }
+            
+            #containerSufixo {
+                padding: 8px;
+            }
+            
+            .collapse-section {
+                margin-top: 15px;
+            }
+            
+            .collapse-section label {
+                font-size: 16px !important;
+            }
+            
+            .collapse-section textarea {
+                min-height: 80px;
+            }
+        }
+        
+        /* Melhorias no layout das fraseologias */
+        .frase {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .frase {
+                margin-bottom: 15px;
+            }
+            
+            .frase label {
+                font-size: 16px !important;
+            }
+            
+            #inputDados {
+                min-height: 100px;
+            }
+        }
+    </style>
 </head>
-<body>
-<h2>Formatador</h2>
-<label><input type="checkbox" id="usarNotaEnem" /> Usar nota do ENEM</label>
-<textarea id="inputText" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
-<br>
-<button onclick="aplicarFormatacao()">Aplicar Espaçamento e Copiar</button>
-<textarea id="outputText" readonly></textarea>
 
-<script>
-function aplicarFormatacao() {
-  let texto = document.getElementById('inputText').value;
+<body id="app" class="modo-Formatador">
+    <div class="container mx-auto max-w-6xl">
+        <h3 class="text-2xl md:text-3xl font-semibold mb-6 md:mb-10 mt-5 text-center md:text-left">Formatador</h3>
+        
+        <div id="botoesModo">
+            <button id="btnFormatador" onclick="alternarModo(this, 'Formatador')" class="modoBtn ativo text-sm md:text-lg font-semibold">Orçamentos</button>
+            <button id="btnTextos" onclick="alternarModo(this, 'Simplificado')" class="modoBtn text-sm md:text-lg font-semibold">Textos</button>
+            <button id="btnBloco" onclick="alternarModo(this, 'Bloco')" class="modoBtn text-sm md:text-lg font-semibold">Planilha</button>
+            <button id="btnFraseologia" onclick="alternarModo(this, 'Fraseologia')" class="modoBtn text-sm md:text-lg font-semibold">Fraseologias</button>
+            <button id="btnSufixo" onclick="alternarModo(this, 'Sufixo')" class="modoBtn text-sm md:text-lg font-semibold">Sufixos</button>
+        </div>
 
-  const urls = [];
-  texto = texto.replace(/\bhttps?:\/\/[^\s]+/gi, (m) => { 
-    urls.push(m); 
-    return `__URL${urls.length-1}__`; 
+        <!-- Simplificado -->
+        <div id="containerSimplificado">
+            <textarea id="inputSimplificado" class="rounded-md text-base md:text-lg" rows="12" placeholder="Cole seu texto aqui..."></textarea>
+            <button id="btnTextosAplicar" class="btn-base font-semibold text-sm mt-5 md:text-lg w-full md:w-auto" onclick="formatarSimplificado()">Aplicar Espaçamento e Copiar</button>
+            <textarea id="outputSimplificado" class="rounded-md text-base md:text-lg mt-5" rows="12" readonly></textarea>
+        </div>
+
+        <!-- Bloco de notas -->
+        <div id="blocoNotas">
+            <button id="carregarPlanilha" class="btn-base font-semibold text-sm md:text-lg w-full md:w-auto mb-4">📂 Carregar Planilha</button>
+            <input type="file" id="inputPlanilha" accept=".xlsx, .xls" style="display:none" />
+            <div id="previewExcel" class="w-full overflow-auto"></div>
+        </div>
+
+        <!-- Interface principal -->
+        <div id="containerPadrao">
+            <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                <button id="usarNotaEnem" class="btn-base font-semibold text-sm md:text-lg" onclick="toggleNotaInput()">Usar nota do ENEM</button>
+                <input type="number" class="rounded-md text-black font-semibold text-base mt-5 md:text-lg w-full md:w-48" id="notaEnem" placeholder="Digite a nota do ENEM" style="display:none;" min="0" max="1000" />
+            </div>
+            <textarea id="inputText" class="rounded-md text-base md:text-lg mt-5" rows="12" placeholder="Cole seu texto aqui ..."></textarea>
+            <button id="btnFormatadorAplicar" class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="aplicarFormatacao()">Aplicar Espaçamento e Copiar</button>
+            <textarea id="outputText" class="rounded-md font-semibold text-base md:text-lg mt-5" readonly></textarea>
+        </div>
+
+        <!-- Fraseologia -->
+        <div id="fraseologiaContainer">
+            <textarea class="rounded-md text-base md:text-lg w-full" id="inputDados" rows="3" placeholder="Cole os dados aqui..."></textarea>
+            <button id="btnFraseologiaGerar" class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="gerarFraseologias()">Gerar Fraseologias</button>
+            
+            <div class="frase mt-6">
+                <label for="frase1" class="block font-semibold text-base md:text-lg mb-2"><strong>Fraseologia de matrícula:</strong></label>
+                <textarea class="rounded-md text-base md:text-lg w-full" id="frase1" rows="3" readonly></textarea>
+                <button class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase1')">Copiar Fraseologia</button>
+            </div>
+            
+            <div class="frase mt-6">
+                <label for="frase2" class="block font-semibold text-base md:text-lg mb-2"><strong>Registro CRM:</strong></label>
+                <textarea class="rounded-md text-base md:text-lg w-full" id="frase2" rows="4" readonly></textarea>
+                <button class="btn-base font-semibold text-sm md:text-lg mt-2 w-full md:w-auto" onclick="copiarTexto('frase2')">Copiar Fraseologia</button>
+            </div>
+        </div>
+
+        <!-- Container Sufixo -->
+        <div id="containerSufixo" class="text-white rounded-lg">
+            <div class="sufixo-buttons">
+                <button class="btn-base btn-profissionalizante btn-section font-semibold text-sm md:text-lg" data-target="profissionalizante">Profissionalizante</button>
+                <button class="btn-base btn-tecnicoEAD btn-section font-semibold text-sm md:text-lg" data-target="tecnico-dist">Técnico EAD</button>
+                <button class="btn-base btn-tecnicoSemi btn-section font-semibold text-sm md:text-lg" data-target="tecnico-semi">Técnico Semi</button>
+                <button class="btn-base btn-graduacao-ead btn-section font-semibold text-sm md:text-lg" data-target="graduacao-dist">Graduação EAD</button>
+                <button class="btn-base btn-graduacao-semi btn-section font-semibold text-sm md:text-lg" data-target="graduacao-semi">Graduação Semi</button>
+                <button class="btn-base btn-graduacao-pres btn-section font-semibold text-sm md:text-lg" data-target="graduacao-pres">Graduação Presencial</button>
+                <button class="btn-base btn-pos btn-section font-semibold text-sm md:text-lg" data-target="pos-grad">Pós-graduação</button>
+            </div>
+
+            <!-- Seções -->
+            <div id="profissionalizante" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="profissionalizante-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="profissionalizante-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="profissionalizante-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="tecnico-dist" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="tecnico-dist-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="tecnico-dist-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="tecnico-dist-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="tecnico-semi" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="tecnico-semi-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibond text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="tecnico-semi-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="tecnico-semi-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="graduacao-dist" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="graduacao-dist-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="graduacao-dist-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="graduacao-dist-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="graduacao-semi" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="graduacao-semi-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="graduacao-semi-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="graduacao-semi-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="graduacao-pres" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="graduacao-pres-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="graduacao-pres-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="graduacao-pres-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+
+            <div id="pos-grad" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <textarea id="pos-grad-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <textarea id="pos-grad-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
+                <textarea id="pos-grad-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
+            </div>
+        </div>
+    </div>
+
+
+  <script>
+
+ const buttons = document.querySelectorAll(".btn-section");
+  const sections = document.querySelectorAll(".collapse-section");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      // Esconder todas as seções
+      sections.forEach(sec => sec.classList.add("hidden"));
+
+      // Remover classe de ativo de todos os botões
+      buttons.forEach(b => b.classList.remove("ativo"));
+
+      // Mostrar a seção correspondente
+      const target = document.getElementById(btn.dataset.target);
+      target.classList.remove("hidden");
+
+      // Adicionar classe de ativo ao botão clicado
+      btn.classList.add("ativo");
+    });
   });
 
-  let linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
-  linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
+   document.addEventListener('DOMContentLoaded', () => {
+    // Seleciona todos os textareas
+    const textareas = document.querySelectorAll('.inputSufixo');
 
-  const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
-  const iCont = linhas.findIndex(l => /^continuar$/i.test(l));
-  if (iCurr !== -1 && iCont !== -1) {
-    linhas.splice(iCurr, iCont - iCurr + 1);
-  }
+    textareas.forEach(textarea => {
+      const id = textarea.closest('div.collapse-section').id + '-' + textarea.previousElementSibling.innerText.trim();
+      
+      // Carrega o valor salvo no localStorage, se existir
+      const savedValue = localStorage.getItem(id);
+      if (savedValue) {
+        textarea.value = savedValue;
+      }
 
-  let faixas = [];
-  if (document.getElementById('usarNotaEnem').checked) {
-    const inicioTabela = linhas.findIndex(l => l.includes('Na matrícula'));
-    const fimTabela = linhas.findIndex(l => l.includes('Total de parcelas'));
-    if (inicioTabela !== -1 && fimTabela !== -1) {
-      const tabela = linhas.slice(inicioTabela, fimTabela).join('\n');
-      const blocosFaixas = tabela.split(/\n(?=Até|De|A partir)/i).filter(Boolean);
-      blocosFaixas.forEach(bloco => {
-        let min = 0, max = Infinity;
-        const numeros = bloco.match(/\d+(?:[.,]\d+)?/g)?.map(n => parseFloat(n.replace(',', '.'))) || [];
-
-        if (/Até/i.test(bloco)) {
-          max = numeros[0];
-        } else if (/De/i.test(bloco) && /a/i.test(bloco)) {
-          min = numeros[0];
-          max = numeros[1];
-        } else if (/A partir/i.test(bloco)) {
-          min = numeros[0];
-        }
-
-        let descontoPrincipal = bloco.match(/Bolsa de\s+(\d{1,3}(?:[.,]\d{1,2})?)%/i)?.[1];
-        if (!descontoPrincipal) {
-          descontoPrincipal = bloco.match(/(\d{1,3}(?:[.,]\d{1,2})?)%/)?.[1] || "0,00";
-        }
-        descontoPrincipal = descontoPrincipal.replace('.', ',');
-
-        const valorPontualidade = bloco.match(/R\$ (\d{1,3}(?:[.,]\d{2})?)$/m)?.[1] || "0,00";
-
-        faixas.push({
-          min,
-          max,
-          valorPontualidade,
-          descontoBolsa: descontoPrincipal
-        });
+      // Salva no localStorage sempre que houver alteração
+      textarea.addEventListener('input', () => {
+        localStorage.setItem(id, textarea.value);
       });
+    });
+  });
 
-      linhas.splice(inicioTabela, fimTabela - inicioTabela);
-    }
+  function alternarModo(botao, tipo) {
+    document.querySelectorAll('.modoBtn').forEach(btn => btn.classList.remove('ativo'));
+    botao.classList.add('ativo');
 
-    const nota = parseInt(prompt('Qual a nota da redação?'));
-    let faixa = faixas.find(f => nota >= f.min && nota <= f.max);
+    // Mudar classe no body para aplicar estilo correto aos campos
+    document.getElementById('app').className = 'modo-' + tipo;
 
-    
-    if (!faixa) {
-      const maiorFaixa = faixas.reduce((prev, curr) => (curr.min > prev.min ? curr : prev), { min: 0 });
-      if (nota > maiorFaixa.min) {
-        faixa = {
-          min: nota,
-          max: nota,
-          valorPontualidade: "0,00",
-          descontoBolsa: "100,00"
-        };
-      }
-    }
+    document.getElementById('containerPadrao').style.display = tipo === 'Formatador' ? 'block' : 'none';
+    document.getElementById('containerSimplificado').style.display = tipo === 'Simplificado' ? 'block' : 'none';
+    document.getElementById('blocoNotas').style.display = tipo === 'Bloco' ? 'block' : 'none';
+    document.getElementById('fraseologiaContainer').style.display = tipo === 'Fraseologia' ? 'block' : 'none';
+    document.getElementById('containerSufixo').style.display = tipo === 'Sufixo' ? 'block' : 'none';
 
-    if (faixa) {
-      const indexPor = linhas.findIndex(l => l.trim().toLowerCase().startsWith('por:'));
-      if (indexPor !== -1) {
-        linhas[indexPor + 1] = `R$ ${faixa.valorPontualidade}`;
-        linhas.splice(indexPor + 2, 0, `Bolsa de ${faixa.descontoBolsa}% em nota do ENEM`);
-      }
+    const usarNotaEnem = document.getElementById('usarNotaEnem');
+    if (usarNotaEnem) {
+      usarNotaEnem.parentElement.style.display = tipo === 'Formatador' ? 'block' : 'none';
     }
   }
 
-  const termosRegra1 = ['por:', 'matrícula', 'oportunidade de desconto', 'total de parcelas', 'valor da proposta válido para'];
+
+      function adicionarEmotes(linhas) {
+    const emotesMap = [
+      { regex: /^graduação$/i, emoji: "📚" },
+      { regex: /^Formação Pedagógica$/i, emoji: "📚" },
+      { regex: /^Profissionalizante$/i, emoji: "📚" },
+      { regex: /^Técnico$/i, emoji: "📚" },
+      { regex: /^Pós-graduação$/i, emoji: "📚" },
+      { regex: /^Bolsa$/i, emoji: "📌" },
+      { regex: /^duração:/i, emoji: "⏳" },
+      { regex: /^A Distância/i, emoji: "📱", },
+      { regex: /^Semipresencial/i, emoji: "📆", },
+      { regex: /^Presencial/i, emoji: "🏫" },
+      { regex: /^carga horária:/i, emoji: "🕒" },
+      { regex: /^nota mec:/i, emoji: "📝" },
+      { regex: /^mensalidade$/i, emoji: "💰" },
+      { regex: /^de:/i, emoji: "💸" },
+      { regex: /^por:/i, emoji: "💸" },
+      { regex: /\d{1,3}(?:[.,]\d+)?%\s+de\s+desconto/i, emoji: "🔻" },
+      { regex: /^matrícula/i, emoji: "🔑" },
+      { regex: /^oportunidade de desconto/i, emoji: "🎯" },
+      { regex: /^superpolo/i, emoji: "🏫" },
+      { regex: /^total de parcelas/i, emoji: "💳" },
+      { regex: /^valor da proposta válido para/i, emoji: "📍" }
+    ];
+
+    return linhas.map(linha => {
+      for (let { regex, emoji } of emotesMap) {
+        if (regex.test(linha)) {
+          return `${emoji} ${linha}`;
+        }
+      }
+      return linha;
+    });
+  }
+
+   let notaEnemAtivo = false;
+
+  function toggleNotaInput() {
+    const btn = document.getElementById("usarNotaEnem");
+    const notaInput = document.getElementById("notaEnem");
+
+    notaEnemAtivo = !notaEnemAtivo;
+
+    if (notaEnemAtivo) {
+      btn.classList.add("ativo");
+      notaInput.style.display = "block";
+    } else {
+      btn.classList.remove("ativo");
+      notaInput.style.display = "none";
+    }
+  }
+
+
+  function aplicarFormatacao() {
+        let texto = document.getElementById('inputText').value;
+        const urls = [];
+        texto = texto.replace(/\bhttps?:\/\/[^\s]+/gi, (m) => {
+          urls.push(m);
+          return `__URL${urls.length-1}__`;
+        });
+
+        let linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
+      
+        let duracao = null;
+  let cargaHoraria = null;
+
+  for (let i = 0; i < Math.min(6, linhas.length); i++) {
+    let l = linhas[i].toLowerCase();
+
+    // Duração: número + meses/ano(s)
+    if (!duracao && /^\d+\s*(meses|ano|anos)$/.test(l)) {
+      duracao = `⏳ Duração: ${linhas[i]}`;
+    }
+    // Carga horária: número + horas/h/hrs
+    else if (!cargaHoraria && /^\d+\s*(horas|h|hrs)$/.test(l)) {
+      cargaHoraria = `🕒 Carga horária: ${linhas[i]}`;
+    }
+  }
+
+  // Remove as linhas soltas capturadas para evitar repetição
+  if (duracao) {
+    const valorDuracao = duracao.replace(/^⏳ Duração:\s*/i, '').trim();
+    linhas = linhas.filter(l => l !== valorDuracao);
+  }
+  if (cargaHoraria) {
+    const valorCarga = cargaHoraria.replace(/^🕒 Carga horária:\s*/i, '').trim();
+    linhas = linhas.filter(l => l !== valorCarga);
+  }
+
+  // Insere logo após o nome do curso e graduação (índices 2 e 3)
+  if (duracao) linhas.splice(2, 0, duracao);
+  if (cargaHoraria) linhas.splice(duracao ? 3 : 2, 0, cargaHoraria);
+
+
+
+
+        linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
+        const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
+        const iCont = linhas.findIndex(l => /^continuar$/i.test(l));
+        if (iCurr !== -1 && iCont !== -1) {
+          linhas.splice(iCurr, iCont - iCurr + 1);
+        }
+
+        let faixas = [];
+        if (notaEnemAtivo) {
+          const inicioTabela = linhas.findIndex(l => l.includes('Na matrícula'));
+          const fimTabela = linhas.findIndex(l => l.includes('Total de parcelas'));
+          if (inicioTabela !== -1 && fimTabela !== -1) {
+            const tabela = linhas.slice(inicioTabela, fimTabela).join('\n');
+            const blocosFaixas = tabela.split(/\n(?=Até|De|A partir)/i).filter(Boolean);
+            blocosFaixas.forEach(bloco => {
+              let min = 0, max = Infinity;
+              const numeros = bloco.match(/\d+(?:[.,]\d+)?/g)?.map(n => parseFloat(n.replace(',', '.'))) || [];
+
+              if (/Até/i.test(bloco)) max = numeros[0];
+              else if (/De/i.test(bloco) && /a/i.test(bloco)) {
+                min = numeros[0]; max = numeros[1];
+              } else if (/A partir/i.test(bloco)) min = numeros[0];
+
+              let descontoPrincipal = bloco.match(/📌 Bolsa de\s+(\d{1,3}(?:[.,]\d{1,2})?)%/i)?.[1] || bloco.match(/(\d{1,3}(?:[.,]\d{1,2})?)%/)?.[1] || "0,00";
+              descontoPrincipal = descontoPrincipal.replace('.', ',');
+              const valorPontualidade = bloco.match(/R\$ (\d{1,3}(?:[.,]\d{2})?)$/m)?.[1] || "0,00";
+
+              faixas.push({ min, max, valorPontualidade, descontoBolsa: descontoPrincipal});
+            });
+
+            linhas.splice(inicioTabela, fimTabela - inicioTabela);
+          }
+
+          const nota = parseInt(document.getElementById('notaEnem').value);
+          if (!isNaN(nota)) {
+            let faixa = faixas.find(f => nota >= f.min && nota <= f.max);
+            if (!faixa) {
+              const maiorFaixa = faixas.reduce((prev, curr) => (curr.min > prev.min ? curr : prev), { min: 0 });
+              if (nota > maiorFaixa.min) {
+                faixa = { min: nota, max: nota, valorPontualidade: "0,00", descontoBolsa: "100,00" };
+              }
+            }
+
+            if (faixa) {
+    const indexPor = linhas.findIndex(l => l.trim().toLowerCase().startsWith('por:'));
+  if (indexPor !== -1) {
+    const novaLinhaValor = `R$ ${faixa.valorPontualidade}`;
+
+    // Remove qualquer linha com valor antigo que apareça logo depois
+    if (linhas[indexPor + 1] && !linhas[indexPor + 1].toLowerCase().includes('bolsa')) {
+      linhas.splice(indexPor + 1, 1, novaLinhaValor);
+    } else {
+      linhas.splice(indexPor + 1, 0, novaLinhaValor);
+    }
+
+    // Garante que a linha de "Bolsa de ..." esteja logo depois do valor
+    if (!linhas[indexPor + 2]?.toLowerCase().includes('bolsa')) {
+      linhas.splice(indexPor + 2, 0, `📌 Bolsa de ${faixa.descontoBolsa}% em nota do ENEM`);
+    }
+
+    for (let i = indexPor + 3; i < linhas.length; i++) {
+      if (/^\d{1,3}(?:[.,]\d{2})$/.test(linhas[i]) || /^R\$/.test(linhas[i])) {
+        linhas.splice(i, 1);
+        break; // remove só o primeiro encontrado
+      }
+      }
+    }
+    }
+  }
+  }
+
+
+  const linha2 = linhas[1]?.trim() || '';
+const linha4 = linhas[3]?.trim() || '';
+
+let sufixo = null;
+const textoCompleto = linhas.join(' '); // junta tudo pra facilitar a busca
+
+if (/profissionalizante/i.test(textoCompleto)) {
+  sufixo = 'profissionalizante';
+} else if (/técnico.*a distância/i.test(textoCompleto)) {
+  sufixo = 'tecnico-dist';
+} else if (/técnico.*semipresencial/i.test(textoCompleto)) {
+  sufixo = 'tecnico-semi';
+} else if (/graduação|Formação Pedagógica/i.test(textoCompleto) && /a distância/i.test(textoCompleto)) {
+  sufixo = 'graduacao-dist';
+} else if (/graduação/i.test(textoCompleto) && /semipresencial/i.test(textoCompleto)) {
+  sufixo = 'graduacao-semi';
+} else if (/graduação/i.test(textoCompleto) && /presencial/i.test(textoCompleto)) {
+  sufixo = 'graduacao-pres';
+} else if (/pós-graduação/i.test(textoCompleto)) {
+  sufixo = 'pos-grad';
+}
+
+// Determina o sufixo baseado nas regras
+if (/profissionalizante/i.test(linha2)) {
+  sufixo = 'profissionalizante';
+} else if (/técnico/i.test(linha2) && /A Distância/i.test(linha4)) {
+  sufixo = 'tecnico-dist';
+} else if (/técnico/i.test(linha2) && /Semipresencial/i.test(linha4)) {
+  sufixo = 'tecnico-semi';
+} else if ((/graduação/i.test(linha2) || /Formação Pedagógica/i.test(linha2)) && /A Distância/i.test(linha4)) {
+  sufixo = 'graduacao-dist';
+} else if (/graduação/i.test(linha2) && /Semipresencial/i.test(linha4)) {
+  sufixo = 'graduacao-semi';
+} else if (/graduação/i.test(linha2) && /Presencial/i.test(linha4)) {
+  sufixo = 'graduacao-pres';
+} else if (/pós-graduação/i.test(linha2)) {
+  sufixo = 'pos-grad';
+}
+
+// Se encontrou sufixo, acrescenta as informações correspondentes
+if (sufixo) {
+  const campos = ['metodologia', 'inicio', 'mensalidade'];
+  const indexValor = linhas.findIndex(l => /valor da proposta válido para/i.test(l.trim()));
+
+  if (indexValor !== -1) {
+    campos.forEach((campo, i) => {
+      const textarea = document.getElementById(`${sufixo}-${campo}`);
+      if (textarea && textarea.value.trim()) {
+        // Insere logo após a linha "Valor da proposta válido para ..."
+        linhas.splice(indexValor + i + 2, 0, textarea.value.trim());
+      }
+    });
+  }
+}
+
+
+
+
+    linhas = adicionarEmotes(linhas);
+    
+  const termosRegra1 = [
+    '🔑 matrícula',
+    '🎯 oportunidade de desconto',
+    '💳 total de parcelas',
+    '📍 valor da proposta válido para'
+  ];
+
+  const termosRegra2 = ['💸 por:']; // regra exclusiva para "por:"
+
   let resultado = '';
   for (let i = 0; i < linhas.length; i++) {
     const linhaAtual = linhas[i].trim();
     if (!linhaAtual) continue;
     resultado += linhaAtual;
     const proxima = linhas[i + 1]?.trim() || '';
-    if (termosRegra1.includes(linhaAtual.toLowerCase()) || /[.!?:]$/.test(linhaAtual)) {
+
+    // Regra 2 primeiro
+    if (termosRegra2.includes(linhaAtual.toLowerCase())) {
+      resultado += '\n'; // mesma configuração da regra 1, mas com 1 linha a menos
+    }
+    else if (termosRegra1.includes(linhaAtual.toLowerCase()) || /[.!?:]$/.test(linhaAtual)) {
       resultado += '\n\n';
-    } else if (proxima) {
-      resultado += '\n\n\n\n';
-    } else {
+    }
+    else if (proxima) {
+      resultado += '\n\n\n';
+    }
+    else {
       resultado += '\n';
     }
   }
 
-  urls.forEach((url, i) => resultado = resultado.replace(`__URL${i}__`, url));
-  document.getElementById('outputText').value = resultado;
-  document.getElementById('inputText').value = '';
-  navigator.clipboard.writeText(resultado)
-    .then(() => alert('Texto formatado e copiado com sucesso!'));
-}
-</script>
-</body>
-</html>
+        urls.forEach((url, i) => resultado = resultado.replace(`__URL${i}__`, url));
+        document.getElementById('outputText').value = resultado;
+        document.getElementById('inputText').value = '';
+        navigator.clipboard.writeText(resultado).then(() => {
+        const mensagem = document.createElement('div');
+    mensagem.textContent = 'Texto formatado e copiado!';
+    mensagem.style.position = 'fixed';
+    mensagem.style.bottom = '20px';
+    mensagem.style.right = '20px';
+    mensagem.style.backgroundColor = '#4CAF50';
+    mensagem.style.color = 'white';
+    mensagem.style.padding = '12px 20px';
+    mensagem.style.borderRadius = '8px';
+    mensagem.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.2)';
+    mensagem.style.fontSize = '16px';
+    mensagem.style.zIndex = 1000;
+    document.body.appendChild(mensagem);
+
+    setTimeout(() => {
+      mensagem.remove();
+    }, 2000);
+  });
+  }
+
+
+      function gerarFraseologias() {
+    const input = document.getElementById('inputDados').value;
+
+    // Extrair nome completo (do início até antes do primeiro número)
+    const nome = input.match(/^(.+?)\s+\d/);
+    const nomeCompleto = nome ? nome[1].trim() : '';
+
+    // Extrair curso (depois da data e hora)
+    const cursoMatch = input.match(/\d{2}\/\d{2}\/\d{4}(?:\s\d{2}:\d{2})?\s+(.+?)\s+(?:APROVADO|2ª GRADUAÇÃO|INSCRITO|MATRICULADO)/i);
+    const curso = cursoMatch ? cursoMatch[1].trim() : '';
+
+    // Extrair número do evento (últimos 4 dígitos no final do texto)
+    const eventoMatch = input.match(/(\d{4})\s*$/);
+    const evento = eventoMatch ? eventoMatch[1].trim() : '';
+
+    const frase1 = `${nomeCompleto}, você autoriza a sua matrícula no curso de ${curso} na data de hoje?`;
+    const frase2 = `Atendimento realizado através do WhatsApp, fraseologia de autorização por candidato ${nomeCompleto}, ciente da conclusão de matrícula no curso ${curso} no evento ${evento}.`;
+
+    document.getElementById('frase1').value = frase1;
+    document.getElementById('frase2').value = frase2;
+    document.getElementById('inputDados').value = '';
+  }
+
+  function formatarSimplificado() {
+    let texto = document.getElementById('inputSimplificado').value;
+    texto = texto.split('\n').map(l => l.trim()).filter(l => l).join('\n\n\n\n');
+    document.getElementById('outputSimplificado').value = texto;
+    document.getElementById('inputSimplificado').value = '';
+    navigator.clipboard.writeText(texto).then(() => {
+        const mensagem = document.createElement('div');
+    mensagem.textContent = 'Texto formatado e copiado!';
+    mensagem.style.position = 'fixed';
+    mensagem.style.bottom = '20px';
+    mensagem.style.right = '20px';
+    mensagem.style.backgroundColor = '#4CAF50';
+    mensagem.style.color = 'white';
+    mensagem.style.padding = '12px 20px';
+    mensagem.style.borderRadius = '8px';
+    mensagem.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.2)';
+    mensagem.style.fontSize = '16px';
+    mensagem.style.zIndex = 1000;
+    document.body.appendChild(mensagem);
+
+    setTimeout(() => {
+      mensagem.remove();
+    }, 2000);
+  });
+  }
+
+  function copiarTexto(id) {
+        const texto = document.getElementById(id);
+        texto.select();
+        texto.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        const mensagem = document.createElement('div');
+    mensagem.textContent = 'Fraseologia copiada!';
+    mensagem.style.position = 'fixed';
+    mensagem.style.bottom = '20px';
+    mensagem.style.right = '20px';
+    mensagem.style.backgroundColor = '#4CAF50';
+    mensagem.style.color = 'white';
+    mensagem.style.padding = '12px 20px';
+    mensagem.style.borderRadius = '8px';
+    mensagem.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.2)';
+    mensagem.style.fontSize = '16px';
+    mensagem.style.zIndex = 1000;
+    document.body.appendChild(mensagem);
+
+    setTimeout(() => {
+      mensagem.remove();
+    }, 2000);
+      }
+
+  </script>
+  </body>
+  </html>
