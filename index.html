@@ -733,11 +733,13 @@
 
 
         linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
-        const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
-        const iCont = linhas.findIndex(l => /^continuar$/i.test(l));
-        if (iCurr !== -1 && iCont !== -1) {
-          linhas.splice(iCurr, iCont - iCurr + 1);
-        }
+
+const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
+const iCont = linhas.findIndex(l => /^(continuar|ver mensalidade|conferir o valor mensal)$/i.test(l));
+
+if (iCurr !== -1 && iCont !== -1) {
+  linhas.splice(iCurr, iCont - iCurr + 1);
+}
 
         let faixas = [];
         if (notaEnemAtivo) {
