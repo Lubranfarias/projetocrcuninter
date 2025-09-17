@@ -14,6 +14,10 @@
             background-color: #282424;
             color: white;
         }
+
+        .hidden {
+  display: none !important;
+}
         
         /* Responsividade para textarea */
         textarea {
@@ -38,6 +42,8 @@
             border: none;
             min-height: 44px; /* Touch target mínimo */
         }
+
+        
         
         /* Botões modo padrão responsivos */
         .modoBtn {
@@ -122,6 +128,8 @@
                 min-width: 300px;
             }
         }
+
+        
         
         /* Tablet */
         @media (min-width: 769px) and (max-width: 1024px) {
@@ -313,16 +321,18 @@
 
         /* Botões específicos com responsividade */
         .btn-profissionalizante:hover, .btn-profissionalizante.ativo {
-            color: #FF8C42;
-            background-color: #7844fc;
-            box-shadow: 0 0 12px rgba(255, 140, 66, 0.7), 0 0 24px rgba(255, 140, 66, 0.5);
+            color: #7844fc;
+            background-color: black;
+            box-shadow: 0 0 10px rgba(120, 68, 252, 0.6),
+            0 0 20px rgba(120, 68, 252, 0.4),
+            0 0 30px rgba(120, 68, 252, 0.2);
             transform: translateY(-2px);
             font-weight: bold;
         }
 
         .btn-tecnicoEAD:hover, .btn-tecnicoEAD.ativo {
             color: #4ef037;
-            background-color: #6a0572;
+            background-color: #1a3316;
             box-shadow: 0 0 12px rgba(78, 240, 55, 0.7), 0 0 24px rgba(120, 255, 120, 0.5);
             transform: translateY(-2px);
             font-weight: bold;
@@ -330,7 +340,7 @@
 
         .btn-tecnicoSemi:hover, .btn-tecnicoSemi.ativo {
             color: #fcbf49;
-            background-color: #228b22;
+            background-color: black;
             box-shadow: 0 0 12px rgba(252, 191, 73, 0.7), 0 0 24px rgba(255, 220, 150, 0.5);
             transform: translateY(-2px);
             font-weight: bold;
@@ -344,7 +354,26 @@
             font-weight: bold;
         }
 
+        .btn-graduacao-ead-praticas:hover, .btn-graduacao-ead-praticas.ativo {
+            color: #00FFFF;
+            background-color: #001F54;
+            box-shadow: 0 0 12px rgba(0, 200, 255, 0.7), 0 0 24px rgba(0, 200, 255, 0.5);
+            transform: translateY(-2px);
+            font-weight: bold;
+        }
+
+
         .btn-graduacao-semi:hover, .btn-graduacao-semi.ativo {
+            color: #ff1493;
+    background-color: black;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.7),
+                0 0 30px rgba(255, 60, 170, 0.5),
+                0 0 45px rgba(255, 120, 200, 0.3);
+    transform: translateY(-2px);
+    font-weight: bold;
+}
+
+        .btn-graduacao-semi-plus:hover, .btn-graduacao-semi-plus.ativo {
             color: #FFD700;
             background-color: #0077FF;
             box-shadow: 0 0 12px rgba(255, 200, 50, 0.7), 0 0 24px rgba(255, 200, 50, 0.5);
@@ -352,18 +381,23 @@
             font-weight: bold;
         }
 
+        
+
+
         .btn-graduacao-pres:hover, .btn-graduacao-pres.ativo {
-            color: #00FFD5;
-            background-color: #7844fc;
-            box-shadow: 0 0 12px rgba(0, 255, 213, 0.7), 0 0 24px rgba(0, 255, 213, 0.5);
-            transform: translateY(-2px);
-            font-weight: bold;
-        }
+              color: #ff6700;
+    background-color: #73261a; /* cobre avermelhado */
+    box-shadow: 0 0 10px rgba(255, 103, 0, 0.6),
+                0 0 22px rgba(255, 103, 0, 0.45),
+                0 0 35px rgba(255, 103, 0, 0.3);
+    transform: translateY(-2px);
+    font-weight: bold;
+}
 
         .btn-pos:hover, .btn-pos.ativo {
-            color: #FFFF42;
-            background-color: #FF4D4D;
-            box-shadow: 0 0 12px rgba(255, 255, 66, 0.7), 0 0 24px rgba(255, 255, 66, 0.5);
+            color: red;
+            background-color: black;
+            box-shadow: 0 0 12px red;
             transform: translateY(-2px);
             font-weight: bold;
         }
@@ -442,7 +476,7 @@
 
 <body id="app" class="modo-Formatador">
     <div class="container mx-auto max-w-6xl">
-        <h3 class="text-2xl md:text-3xl font-semibold mb-6 md:mb-10 mt-5 text-center md:text-left">Formatador</h3>
+        <h3 class="text-2xl md:text-3xl font-semibold mb-6 md:mb-10 mt-5 text-center md:text-left">Formatador Bebop</h3>
         
         <div id="botoesModo">
             <button id="btnFormatador" onclick="alternarModo(this, 'Formatador')" class="modoBtn ativo text-sm md:text-lg font-semibold">Orçamentos</button>
@@ -529,15 +563,24 @@
             <div id="tecnico-semi" class="flex flex-col space-y-4 collapse-section hidden">
                 <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
                 <textarea id="tecnico-semi-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
-                <label class="font-semibond text-lg md:text-xl !text-purple-300">Início das aulas</label>
+                <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
                 <textarea id="tecnico-semi-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
                 <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
                 <textarea id="tecnico-semi-mensalidade" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e9f7f4;"></textarea>
             </div>
 
             <div id="graduacao-dist" class="flex flex-col space-y-4 collapse-section hidden">
-                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Geral</label>
                 <textarea id="graduacao-dist-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <button class="btn-base btn-graduacao-ead-praticas font-semibold text-sm md:text-lg" data-target="cursos-com-praticas">Cursos com práticas</button>
+                <div id="cursos-com-praticas" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Fonoaudiologia</label>
+                <textarea id="graduacao-dist-fono" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Terapia Ocupacional</label>
+                <textarea id="graduacao-dist-terapia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Instrumentação Cirúrgica</label>
+                <textarea id="graduacao-dist-instrumentacao" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                </div>
                 <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
                 <textarea id="graduacao-dist-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
                 <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
@@ -547,6 +590,17 @@
             <div id="graduacao-semi" class="flex flex-col space-y-4 collapse-section hidden">
                 <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia</label>
                 <textarea id="graduacao-semi-metodologia" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <button class="btn-base btn-graduacao-semi-plus font-semibold text-sm md:text-lg" data-target="graduacao-semi-plus">Cursos Lapad</button>
+                <div id="graduacao-semi-plus" class="flex flex-col space-y-4 collapse-section hidden">
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Farmácia</label>
+                <textarea id="graduacao-semi-farma" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Nutrição</label>
+                <textarea id="graduacao-semi-nutri" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Medicina veterinária</label>
+                <textarea id="graduacao-semi-medi" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;">		</textarea>
+		            <label class="font-semibold text-lg md:text-xl !text-blue-300">Metodologia Fisioterapia</label>
+                <textarea id="graduacao-semi-fisio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #e8f9ff;"></textarea>
+                </div>
                 <label class="font-semibold text-lg md:text-xl !text-purple-300">Início das aulas</label>
                 <textarea id="graduacao-semi-inicio" class="inputSufixo p-3 rounded-md border border-gray-600 text-black text-base md:text-lg" style="background-color: #f1e9ff;"></textarea>
                 <label class="font-semibold text-lg md:text-xl !text-green-300">Primeira mensalidade</label>
@@ -596,6 +650,24 @@
     });
   });
 
+
+  document.querySelectorAll("button[data-target]").forEach(button => {
+    button.addEventListener("click", (e) => {
+      const targetId = button.getAttribute("data-target");
+      const targetDiv = document.getElementById(targetId);
+
+      // Só faz o toggle se a div não for uma das "abas principais"
+      if (targetDiv && !button.classList.contains("btn-section")) {
+        targetDiv.classList.toggle("hidden");
+        e.stopPropagation(); // evita conflito com o script das abas
+      }
+    });
+  });
+
+
+
+
+
    document.addEventListener('DOMContentLoaded', () => {
     // Seleciona todos os textareas
     const textareas = document.querySelectorAll('.inputSufixo');
@@ -615,6 +687,7 @@
       });
     });
   });
+
 
   function alternarModo(botao, tipo) {
     document.querySelectorAll('.modoBtn').forEach(btn => btn.classList.remove('ativo'));
@@ -805,62 +878,96 @@ if (iCurr !== -1 && iCont !== -1) {
   }
   }
 
-
-  const linha2 = linhas[1]?.trim() || '';
+const linha1 = linhas[0]?.trim() || '';
+const linha2 = linhas[1]?.trim() || '';
 const linha4 = linhas[3]?.trim() || '';
 
 let sufixo = null;
+let metodologiaId = null;
 const textoCompleto = linhas.join(' '); // junta tudo pra facilitar a busca
 
-if (/profissionalizante/i.test(textoCompleto)) {
-  sufixo = 'profissionalizante';
-} else if (/técnico.*a distância/i.test(textoCompleto)) {
-  sufixo = 'tecnico-dist';
-} else if (/técnico.*semipresencial/i.test(textoCompleto)) {
-  sufixo = 'tecnico-semi';
-} else if (/graduação|Formação Pedagógica/i.test(textoCompleto) && /a distância/i.test(textoCompleto)) {
+// 🚨 Regra prioritária: cursos com atividades práticas (metodologia exclusiva)
+if (/fonoaudiologia|terapia ocupacional|instrumentação cirúrgica/i.test(linha1)) {
   sufixo = 'graduacao-dist';
-} else if (/graduação/i.test(textoCompleto) && /semipresencial/i.test(textoCompleto)) {
-  sufixo = 'graduacao-semi';
-} else if (/graduação/i.test(textoCompleto) && /presencial/i.test(textoCompleto)) {
-  sufixo = 'graduacao-pres';
-} else if (/pós-graduação/i.test(textoCompleto)) {
-  sufixo = 'pos-grad';
+
+  if (/fonoaudiologia/i.test(linha1)) {
+    metodologiaId = 'graduacao-dist-fono';
+  } else if (/terapia ocupacional/i.test(linha1)) {
+    metodologiaId = 'graduacao-dist-terapia';
+  } else if (/instrumentação cirúrgica/i.test(linha1)) {
+    metodologiaId = 'graduacao-dist-instrumentacao';
+  }
 }
-
-// Determina o sufixo baseado nas regras
-if (/profissionalizante/i.test(linha2)) {
-  sufixo = 'profissionalizante';
-} else if (/técnico/i.test(linha2) && /A Distância/i.test(linha4)) {
-  sufixo = 'tecnico-dist';
-} else if (/técnico/i.test(linha2) && /Semipresencial/i.test(linha4)) {
-  sufixo = 'tecnico-semi';
-} else if ((/graduação/i.test(linha2) || /Formação Pedagógica/i.test(linha2)) && /A Distância/i.test(linha4)) {
-  sufixo = 'graduacao-dist';
-} else if (/graduação/i.test(linha2) && /Semipresencial/i.test(linha4)) {
+else if (/farmácia|nutrição|medicina veterinária|fisioterapia/i.test(linha1)) {
   sufixo = 'graduacao-semi';
-} else if (/graduação/i.test(linha2) && /Presencial/i.test(linha4)) {
-  sufixo = 'graduacao-pres';
-} else if (/pós-graduação/i.test(linha2)) {
-  sufixo = 'pos-grad';
-}
 
-// Se encontrou sufixo, acrescenta as informações correspondentes
-if (sufixo) {
-  const campos = ['metodologia', 'inicio', 'mensalidade'];
-  const indexValor = linhas.findIndex(l => /valor da proposta válido para/i.test(l.trim()));
+  if (/farmácia/i.test(linha1)) {
+    metodologiaId = 'graduacao-semi-farma';
+  } else if (/nutrição/i.test(linha1)) {
+    metodologiaId = 'graduacao-semi-nutri';
+  } else if (/fisioterapia/i.test(linha1)) {
+    metodologiaId = 'graduacao-semi-fisio';
+  }
+} else {
+  // 🔽 Regra padrão (mantém tudo que já existia)
+  if (/profissionalizante/i.test(textoCompleto)) {
+    sufixo = 'profissionalizante';
+  } else if (/técnico.*a distância/i.test(textoCompleto)) {
+    sufixo = 'tecnico-dist';
+  } else if (/técnico.*semipresencial/i.test(textoCompleto)) {
+    sufixo = 'tecnico-semi';
+  } else if (/graduação|Formação Pedagógica/i.test(textoCompleto) && /a distância/i.test(textoCompleto)) {
+    sufixo = 'graduacao-dist';
+  } else if (/graduação/i.test(textoCompleto) && /semipresencial/i.test(textoCompleto)) {
+    sufixo = 'graduacao-semi';
+  } else if (/graduação/i.test(textoCompleto) && /presencial/i.test(textoCompleto)) {
+    sufixo = 'graduacao-pres';
+  } else if (/pós-graduação/i.test(textoCompleto)) {
+    sufixo = 'pos-grad';
+  }
 
-  if (indexValor !== -1) {
-    campos.forEach((campo, i) => {
-      const textarea = document.getElementById(`${sufixo}-${campo}`);
-      if (textarea && textarea.value.trim()) {
-        // Insere logo após a linha "Valor da proposta válido para ..."
-        linhas.splice(indexValor + i + 2, 0, textarea.value.trim());
-      }
-    });
+  // Determina o sufixo baseado nas linhas 2 e 4
+  if (/profissionalizante/i.test(linha2)) {
+    sufixo = 'profissionalizante';
+  } else if (/técnico/i.test(linha2) && /A Distância/i.test(linha4)) {
+    sufixo = 'tecnico-dist';
+  } else if (/técnico/i.test(linha2) && /Semipresencial/i.test(linha4)) {
+    sufixo = 'tecnico-semi';
+  } else if ((/graduação/i.test(linha2) || /Formação Pedagógica/i.test(linha2)) && /A Distância/i.test(linha4)) {
+    sufixo = 'graduacao-dist';
+  } else if (/graduação/i.test(linha2) && /Semipresencial/i.test(linha4)) {
+    sufixo = 'graduacao-semi';
+  } else if (/graduação/i.test(linha2) && /Presencial/i.test(linha4)) {
+    sufixo = 'graduacao-pres';
+  } else if (/pós-graduação/i.test(linha2)) {
+    sufixo = 'pos-grad';
   }
 }
 
+// 🔽 Inserção dos campos
+if (sufixo) {
+  const indexValor = linhas.findIndex(l => /valor da proposta válido para/i.test(l.trim()));
+  if (indexValor !== -1) {
+    // Se houver metodologia exclusiva, usa ela; senão, pega a metodologia padrão
+    const metodologiaTextarea = document.getElementById(metodologiaId || `${sufixo}-metodologia`);
+    const inicioTextarea = document.getElementById(`${sufixo}-inicio`);
+    const mensalidadeTextarea = document.getElementById(`${sufixo}-mensalidade`);
+
+    let offset = 2; // começa a inserir duas linhas depois de "valor da proposta válido para"
+
+    if (metodologiaTextarea && metodologiaTextarea.value.trim()) {
+      linhas.splice(indexValor + offset, 0, metodologiaTextarea.value.trim());
+      offset++;
+    }
+    if (inicioTextarea && inicioTextarea.value.trim()) {
+      linhas.splice(indexValor + offset, 0, inicioTextarea.value.trim());
+      offset++;
+    }
+    if (mensalidadeTextarea && mensalidadeTextarea.value.trim()) {
+      linhas.splice(indexValor + offset, 0, mensalidadeTextarea.value.trim());
+    }
+  }
+}
 
 
 
