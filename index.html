@@ -374,12 +374,14 @@
 }
 
         .btn-graduacao-semi-plus:hover, .btn-graduacao-semi-plus.ativo {
-            color: #FFD700;
-            background-color: #0077FF;
-            box-shadow: 0 0 12px rgba(255, 200, 50, 0.7), 0 0 24px rgba(255, 200, 50, 0.5);
-            transform: translateY(-2px);
-            font-weight: bold;
-        }
+            color: #ff1493;
+    background-color: black;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.7),
+                0 0 30px rgba(255, 60, 170, 0.5),
+                0 0 45px rgba(255, 120, 200, 0.3);
+    transform: translateY(-2px);
+    font-weight: bold;
+}
 
         
 
@@ -763,32 +765,28 @@
 
 
   function aplicarFormatacao() {
-        let texto = document.getElementById('inputText').value;
-        const urls = [];
-        texto = texto.replace(/\bhttps?:\/\/[^\s]+/gi, (m) => {
-          urls.push(m);
-          return `__URL${urls.length-1}__`;
-        });
+  let texto = document.getElementById('inputText').value;
+  const urls = [];
+  texto = texto.replace(/\bhttps?:\/\/[^\s]+/gi, (m) => {
+    urls.push(m);
+    return `__URL${urls.length - 1}__`;
+  });
 
-        let linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
-      
-        let duracao = null;
+  let linhas = texto.split('\n').map(l => l.trim()).filter(l => l);
+
+  let duracao = null;
   let cargaHoraria = null;
 
   for (let i = 0; i < Math.min(6, linhas.length); i++) {
     let l = linhas[i].toLowerCase();
 
-    // Duração: número + meses/ano(s)
     if (!duracao && /^\d+\s*(meses|ano|anos)$/.test(l)) {
       duracao = `⏳ Duração: ${linhas[i]}`;
-    }
-    // Carga horária: número + horas/h/hrs
-    else if (!cargaHoraria && /^\d+\s*(horas|h|hrs)$/.test(l)) {
+    } else if (!cargaHoraria && /^\d+\s*(horas|h|hrs)$/.test(l)) {
       cargaHoraria = `🕒 Carga horária: ${linhas[i]}`;
     }
   }
 
-  // Remove as linhas soltas capturadas para evitar repetição
   if (duracao) {
     const valorDuracao = duracao.replace(/^⏳ Duração:\s*/i, '').trim();
     linhas = linhas.filter(l => l !== valorDuracao);
@@ -798,189 +796,143 @@
     linhas = linhas.filter(l => l !== valorCarga);
   }
 
-  // Insere logo após o nome do curso e graduação (índices 2 e 3)
   if (duracao) linhas.splice(2, 0, duracao);
   if (cargaHoraria) linhas.splice(duracao ? 3 : 2, 0, cargaHoraria);
 
+  linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
 
+  const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
+  const iCont = linhas.findIndex(l => /^(continuar|ver mensalidade|conferir o valor mensal)$/i.test(l));
 
+  if (iCurr !== -1 && iCont !== -1) {
+    linhas.splice(iCurr, iCont - iCurr + 1);
+  }
 
-        linhas = linhas.filter(l => !/Inscreva-se Gratuitamente/i.test(l));
+  // ---- tratamento das faixas ENEM ----
+  let faixas = [];
+  if (notaEnemAtivo) {
+    const inicioTabela = linhas.findIndex(l => l.includes('Na matrícula'));
+    const fimTabela = linhas.findIndex(l => l.includes('Total de parcelas'));
+    if (inicioTabela !== -1 && fimTabela !== -1) {
+      const tabela = linhas.slice(inicioTabela, fimTabela).join('\n');
+      const blocosFaixas = tabela.split(/\n(?=Até|De|A partir)/i).filter(Boolean);
+      blocosFaixas.forEach(bloco => {
+        let min = 0, max = Infinity;
+        const numeros = bloco.match(/\d+(?:[.,]\d+)?/g)?.map(n => parseFloat(n.replace(',', '.'))) || [];
 
-const iCurr = linhas.findIndex(l => /veja grade curricular/i.test(l));
-const iCont = linhas.findIndex(l => /^(continuar|ver mensalidade|conferir o valor mensal)$/i.test(l));
+        if (/Até/i.test(bloco)) max = numeros[0];
+        else if (/De/i.test(bloco) && /a/i.test(bloco)) {
+          min = numeros[0]; max = numeros[1];
+        } else if (/A partir/i.test(bloco)) min = numeros[0];
 
-if (iCurr !== -1 && iCont !== -1) {
-  linhas.splice(iCurr, iCont - iCurr + 1);
-}
+        let descontoPrincipal = bloco.match(/📌 Bolsa de\s+(\d{1,3}(?:[.,]\d{1,2})?)%/i)?.[1]
+          || bloco.match(/(\d{1,3}(?:[.,]\d{1,2})?)%/)?.[1]
+          || "0,00";
+        descontoPrincipal = descontoPrincipal.replace('.', ',');
+        const valorPontualidade = bloco.match(/R\$ (\d{1,3}(?:[.,]\d{2})?)$/m)?.[1] || "0,00";
 
-        let faixas = [];
-        if (notaEnemAtivo) {
-          const inicioTabela = linhas.findIndex(l => l.includes('Na matrícula'));
-          const fimTabela = linhas.findIndex(l => l.includes('Total de parcelas'));
-          if (inicioTabela !== -1 && fimTabela !== -1) {
-            const tabela = linhas.slice(inicioTabela, fimTabela).join('\n');
-            const blocosFaixas = tabela.split(/\n(?=Até|De|A partir)/i).filter(Boolean);
-            blocosFaixas.forEach(bloco => {
-              let min = 0, max = Infinity;
-              const numeros = bloco.match(/\d+(?:[.,]\d+)?/g)?.map(n => parseFloat(n.replace(',', '.'))) || [];
+        faixas.push({ min, max, valorPontualidade, descontoBolsa: descontoPrincipal });
+      });
 
-              if (/Até/i.test(bloco)) max = numeros[0];
-              else if (/De/i.test(bloco) && /a/i.test(bloco)) {
-                min = numeros[0]; max = numeros[1];
-              } else if (/A partir/i.test(bloco)) min = numeros[0];
+      linhas.splice(inicioTabela, fimTabela - inicioTabela);
+    }
 
-              let descontoPrincipal = bloco.match(/📌 Bolsa de\s+(\d{1,3}(?:[.,]\d{1,2})?)%/i)?.[1] || bloco.match(/(\d{1,3}(?:[.,]\d{1,2})?)%/)?.[1] || "0,00";
-              descontoPrincipal = descontoPrincipal.replace('.', ',');
-              const valorPontualidade = bloco.match(/R\$ (\d{1,3}(?:[.,]\d{2})?)$/m)?.[1] || "0,00";
+    const nota = parseInt(document.getElementById('notaEnem').value);
+    if (!isNaN(nota)) {
+      let faixa = faixas.find(f => nota >= f.min && nota <= f.max);
+      if (!faixa) {
+        const maiorFaixa = faixas.reduce((prev, curr) => (curr.min > prev.min ? curr : prev), { min: 0 });
+        if (nota > maiorFaixa.min) {
+          faixa = { min: nota, max: nota, valorPontualidade: "0,00", descontoBolsa: "100,00" };
+        }
+      }
 
-              faixas.push({ min, max, valorPontualidade, descontoBolsa: descontoPrincipal});
-            });
-
-            linhas.splice(inicioTabela, fimTabela - inicioTabela);
+      if (faixa) {
+        const indexPor = linhas.findIndex(l => l.trim().toLowerCase().startsWith('por:'));
+        if (indexPor !== -1) {
+          const novaLinhaValor = `R$ ${faixa.valorPontualidade}`;
+          if (linhas[indexPor + 1] && !linhas[indexPor + 1].toLowerCase().includes('bolsa')) {
+            linhas.splice(indexPor + 1, 1, novaLinhaValor);
+          } else {
+            linhas.splice(indexPor + 1, 0, novaLinhaValor);
           }
-
-          const nota = parseInt(document.getElementById('notaEnem').value);
-          if (!isNaN(nota)) {
-            let faixa = faixas.find(f => nota >= f.min && nota <= f.max);
-            if (!faixa) {
-              const maiorFaixa = faixas.reduce((prev, curr) => (curr.min > prev.min ? curr : prev), { min: 0 });
-              if (nota > maiorFaixa.min) {
-                faixa = { min: nota, max: nota, valorPontualidade: "0,00", descontoBolsa: "100,00" };
-              }
+          if (!linhas[indexPor + 2]?.toLowerCase().includes('bolsa')) {
+            linhas.splice(indexPor + 2, 0, `📌 Bolsa de ${faixa.descontoBolsa}% em nota do ENEM`);
+          }
+          for (let i = indexPor + 3; i < linhas.length; i++) {
+            if (/^\d{1,3}(?:[.,]\d{2})$/.test(linhas[i]) || /^R\$/.test(linhas[i])) {
+              linhas.splice(i, 1);
+              break;
             }
-
-            if (faixa) {
-    const indexPor = linhas.findIndex(l => l.trim().toLowerCase().startsWith('por:'));
-  if (indexPor !== -1) {
-    const novaLinhaValor = `R$ ${faixa.valorPontualidade}`;
-
-    // Remove qualquer linha com valor antigo que apareça logo depois
-    if (linhas[indexPor + 1] && !linhas[indexPor + 1].toLowerCase().includes('bolsa')) {
-      linhas.splice(indexPor + 1, 1, novaLinhaValor);
-    } else {
-      linhas.splice(indexPor + 1, 0, novaLinhaValor);
-    }
-
-    // Garante que a linha de "Bolsa de ..." esteja logo depois do valor
-    if (!linhas[indexPor + 2]?.toLowerCase().includes('bolsa')) {
-      linhas.splice(indexPor + 2, 0, `📌 Bolsa de ${faixa.descontoBolsa}% em nota do ENEM`);
-    }
-
-    for (let i = indexPor + 3; i < linhas.length; i++) {
-      if (/^\d{1,3}(?:[.,]\d{2})$/.test(linhas[i]) || /^R\$/.test(linhas[i])) {
-        linhas.splice(i, 1);
-        break; // remove só o primeiro encontrado
-      }
+          }
+        }
       }
     }
-    }
-  }
   }
 
-const linha1 = linhas[0]?.trim() || '';
-const linha2 = linhas[1]?.trim() || '';
-const linha4 = linhas[3]?.trim() || '';
+  // ---- sufixos ----
+  const linha1 = linhas[0]?.trim() || '';
+  const linha2 = linhas[1]?.trim() || '';
+  const linha4 = linhas[3]?.trim() || '';
+  let sufixo = null;
+  let metodologiaId = null;
+  const textoCompleto = linhas.join(' ');
 
-let sufixo = null;
-let metodologiaId = null;
-const textoCompleto = linhas.join(' '); // junta tudo pra facilitar a busca
-
-// 🚨 Regra prioritária: cursos com atividades práticas (metodologia exclusiva)
-if (/fonoaudiologia|terapia ocupacional|instrumentação cirúrgica/i.test(linha1)) {
-  sufixo = 'graduacao-dist';
-
-  if (/fonoaudiologia/i.test(linha1)) {
-    metodologiaId = 'graduacao-dist-fono';
-  } else if (/terapia ocupacional/i.test(linha1)) {
-    metodologiaId = 'graduacao-dist-terapia';
-  } else if (/instrumentação cirúrgica/i.test(linha1)) {
-    metodologiaId = 'graduacao-dist-instrumentacao';
-  }
-}
-else if (/farmácia|nutrição|medicina veterinária|fisioterapia/i.test(linha1)) {
-  sufixo = 'graduacao-semi';
-
-  if (/farmácia/i.test(linha1)) {
-    metodologiaId = 'graduacao-semi-farma';
-  } else if (/nutrição/i.test(linha1)) {
-    metodologiaId = 'graduacao-semi-nutri';
-  } else if (/fisioterapia/i.test(linha1)) {
-    metodologiaId = 'graduacao-semi-fisio';
-  }
-} else {
-  // 🔽 Regra padrão (mantém tudo que já existia)
-  if (/profissionalizante/i.test(textoCompleto)) {
-    sufixo = 'profissionalizante';
-  } else if (/técnico.*a distância/i.test(textoCompleto)) {
-    sufixo = 'tecnico-dist';
-  } else if (/técnico.*semipresencial/i.test(textoCompleto)) {
-    sufixo = 'tecnico-semi';
-  } else if (/graduação|Formação Pedagógica/i.test(textoCompleto) && /a distância/i.test(textoCompleto)) {
+  if (/fonoaudiologia|terapia ocupacional|instrumentação cirúrgica/i.test(linha1)) {
     sufixo = 'graduacao-dist';
-  } else if (/graduação/i.test(textoCompleto) && /semipresencial/i.test(textoCompleto)) {
+    if (/fonoaudiologia/i.test(linha1)) metodologiaId = 'graduacao-dist-fono';
+    else if (/terapia ocupacional/i.test(linha1)) metodologiaId = 'graduacao-dist-terapia';
+    else if (/instrumentação cirúrgica/i.test(linha1)) metodologiaId = 'graduacao-dist-instrumentacao';
+  } else if (/farmácia|nutrição|medicina veterinária|fisioterapia/i.test(linha1)) {
     sufixo = 'graduacao-semi';
-  } else if (/graduação/i.test(textoCompleto) && /presencial/i.test(textoCompleto)) {
-    sufixo = 'graduacao-pres';
-  } else if (/pós-graduação/i.test(textoCompleto)) {
-    sufixo = 'pos-grad';
+    if (/farmácia/i.test(linha1)) metodologiaId = 'graduacao-semi-farma';
+    else if (/nutrição/i.test(linha1)) metodologiaId = 'graduacao-semi-nutri';
+    else if (/fisioterapia/i.test(linha1)) metodologiaId = 'graduacao-semi-fisio';
+  } else {
+    if (/profissionalizante/i.test(textoCompleto)) sufixo = 'profissionalizante';
+    else if (/técnico.*a distância/i.test(textoCompleto)) sufixo = 'tecnico-dist';
+    else if (/técnico.*semipresencial/i.test(textoCompleto)) sufixo = 'tecnico-semi';
+    else if (/graduação|Formação Pedagógica/i.test(textoCompleto) && /a distância/i.test(textoCompleto)) sufixo = 'graduacao-dist';
+    else if (/graduação/i.test(textoCompleto) && /semipresencial/i.test(textoCompleto)) sufixo = 'graduacao-semi';
+    else if (/graduação/i.test(textoCompleto) && /presencial/i.test(textoCompleto)) sufixo = 'graduacao-pres';
+    else if (/pós-graduação/i.test(textoCompleto)) sufixo = 'pos-grad';
+
+    if (/profissionalizante/i.test(linha2)) sufixo = 'profissionalizante';
+    else if (/técnico/i.test(linha2) && /A Distância/i.test(linha4)) sufixo = 'tecnico-dist';
+    else if (/técnico/i.test(linha2) && /Semipresencial/i.test(linha4)) sufixo = 'tecnico-semi';
+    else if ((/graduação/i.test(linha2) || /Formação Pedagógica/i.test(linha2)) && /A Distância/i.test(linha4)) sufixo = 'graduacao-dist';
+    else if (/graduação/i.test(linha2) && /Semipresencial/i.test(linha4)) sufixo = 'graduacao-semi';
+    else if (/graduação/i.test(linha2) && /Presencial/i.test(linha4)) sufixo = 'graduacao-pres';
+    else if (/pós-graduação/i.test(linha2)) sufixo = 'pos-grad';
   }
 
-  // Determina o sufixo baseado nas linhas 2 e 4
-  if (/profissionalizante/i.test(linha2)) {
-    sufixo = 'profissionalizante';
-  } else if (/técnico/i.test(linha2) && /A Distância/i.test(linha4)) {
-    sufixo = 'tecnico-dist';
-  } else if (/técnico/i.test(linha2) && /Semipresencial/i.test(linha4)) {
-    sufixo = 'tecnico-semi';
-  } else if ((/graduação/i.test(linha2) || /Formação Pedagógica/i.test(linha2)) && /A Distância/i.test(linha4)) {
-    sufixo = 'graduacao-dist';
-  } else if (/graduação/i.test(linha2) && /Semipresencial/i.test(linha4)) {
-    sufixo = 'graduacao-semi';
-  } else if (/graduação/i.test(linha2) && /Presencial/i.test(linha4)) {
-    sufixo = 'graduacao-pres';
-  } else if (/pós-graduação/i.test(linha2)) {
-    sufixo = 'pos-grad';
-  }
-}
+  if (sufixo) {
+    const indexValor = linhas.findIndex(l => /valor da proposta válido para/i.test(l.trim()));
+    if (indexValor !== -1) {
+      const metodologiaTextarea = document.getElementById(metodologiaId || `${sufixo}-metodologia`);
+      const inicioTextarea = document.getElementById(`${sufixo}-inicio`);
+      const mensalidadeTextarea = document.getElementById(`${sufixo}-mensalidade`);
 
-// 🔽 Inserção dos campos
-if (sufixo) {
-  const indexValor = linhas.findIndex(l => /valor da proposta válido para/i.test(l.trim()));
-  if (indexValor !== -1) {
-    // Se houver metodologia exclusiva, usa ela; senão, pega a metodologia padrão
-    const metodologiaTextarea = document.getElementById(metodologiaId || `${sufixo}-metodologia`);
-    const inicioTextarea = document.getElementById(`${sufixo}-inicio`);
-    const mensalidadeTextarea = document.getElementById(`${sufixo}-mensalidade`);
-
-    let offset = 2; // começa a inserir duas linhas depois de "valor da proposta válido para"
-
-    if (metodologiaTextarea && metodologiaTextarea.value.trim()) {
-      linhas.splice(indexValor + offset, 0, metodologiaTextarea.value.trim());
-      offset++;
-    }
-    if (inicioTextarea && inicioTextarea.value.trim()) {
-      linhas.splice(indexValor + offset, 0, inicioTextarea.value.trim());
-      offset++;
-    }
-    if (mensalidadeTextarea && mensalidadeTextarea.value.trim()) {
-      linhas.splice(indexValor + offset, 0, mensalidadeTextarea.value.trim());
+      let offset = 2;
+      if (metodologiaTextarea && metodologiaTextarea.value.trim()) {
+        linhas.splice(indexValor + offset, 0, metodologiaTextarea.value.trim());
+        offset++;
+      }
+      if (inicioTextarea && inicioTextarea.value.trim()) {
+        linhas.splice(indexValor + offset, 0, inicioTextarea.value.trim());
+        offset++;
+      }
+      if (mensalidadeTextarea && mensalidadeTextarea.value.trim()) {
+        linhas.splice(indexValor + offset, 0, mensalidadeTextarea.value.trim());
+      }
     }
   }
-}
 
+  linhas = adicionarEmotes(linhas);
 
-
-    linhas = adicionarEmotes(linhas);
-    
-  const termosRegra1 = [
-    '🔑 matrícula',
-    '🎯 oportunidade de desconto',
-    '💳 total de parcelas',
-    '📍 valor da proposta válido para'
-  ];
-
-  const termosRegra2 = ['💸 por:']; // regra exclusiva para "por:"
+  // ---- montagem resultado ----
+  const termosRegra1 = ['🔑 matrícula', '🎯 oportunidade de desconto', '💳 total de parcelas', '📍 valor da proposta válido para'];
+  const termosRegra2 = ['💸 por:'];
 
   let resultado = '';
   for (let i = 0; i < linhas.length; i++) {
@@ -989,26 +941,63 @@ if (sufixo) {
     resultado += linhaAtual;
     const proxima = linhas[i + 1]?.trim() || '';
 
-    // Regra 2 primeiro
     if (termosRegra2.includes(linhaAtual.toLowerCase())) {
-      resultado += '\n'; // mesma configuração da regra 1, mas com 1 linha a menos
-    }
-    else if (termosRegra1.includes(linhaAtual.toLowerCase()) || /[.!?:]$/.test(linhaAtual)) {
+      resultado += '\n';
+    } else if (termosRegra1.includes(linhaAtual.toLowerCase()) || /[.!?:]$/.test(linhaAtual)) {
       resultado += '\n\n';
-    }
-    else if (proxima) {
+    } else if (proxima) {
       resultado += '\n\n\n';
-    }
-    else {
+    } else {
       resultado += '\n';
     }
   }
 
-        urls.forEach((url, i) => resultado = resultado.replace(`__URL${i}__`, url));
-        document.getElementById('outputText').value = resultado;
-        document.getElementById('inputText').value = '';
-        navigator.clipboard.writeText(resultado).then(() => {
-        const mensagem = document.createElement('div');
+  // ---- complemento se ≤ 6 linhas ----
+  const totalLinhas = linhas.length;
+  if (totalLinhas <= 6) {
+  const segundaLinha = linhas[1]?.toLowerCase() || "";
+
+  let complemento = "";
+  if (segundaLinha.includes("profissionalizante")) {
+    complemento = "\n\nPara que eu possa simular o valor das mensalidades, me informe por gentileza a sua cidade e estado.";
+  } else if (segundaLinha.includes("técnico")) {
+    complemento = "\n\nPara que eu possa simular o valor das mensalidades, me informe por gentileza o seu grau de escolaridade juntamente com a sua cidade e estado.";
+  } 
+  // 🔄 Primeiro checa pós-graduação (para não cair no if de graduação)
+  else if (
+    segundaLinha.includes("pós-graduação") || 
+    segundaLinha.includes("pos-graduação") || 
+    segundaLinha.includes("pos graduação")
+  ) {
+    complemento = "\n\nPara que eu possa simular o valor das mensalidades, me informe por gentileza a sua cidade , estado e a sua primeira graduação juntamente com o ano da colação de grau.";
+  } 
+  else if (segundaLinha.includes("graduação")) {
+    complemento = `
+
+Para que eu possa simular valores mais acessíveis e confortáveis para você, por favor responda o seguinte questionário:
+
+1 - Esta seria a sua primeira graduação?
+
+2 - Prestou prova para o ENEM nos últimos 14 anos ? Se sim, qual foi o ano e a nota da redação?
+
+3 - Qual é a sua Cidade e Estado?`;
+  }
+
+  if (complemento) {
+    // 🔽 Garante uma linha em branco antes de anexar o complemento
+    resultado = resultado.trimEnd() + "\n\n\n" + complemento.trimStart();
+  }
+}
+
+
+  // ---- restaura urls ----
+  urls.forEach((url, i) => resultado = resultado.replace(`__URL${i}__`, url));
+
+  // ---- saída ----
+  document.getElementById('outputText').value = resultado;
+  document.getElementById('inputText').value = '';
+  navigator.clipboard.writeText(resultado).then(() => {
+    const mensagem = document.createElement('div');
     mensagem.textContent = 'Texto formatado e copiado!';
     mensagem.style.position = 'fixed';
     mensagem.style.bottom = '20px';
@@ -1021,12 +1010,12 @@ if (sufixo) {
     mensagem.style.fontSize = '16px';
     mensagem.style.zIndex = 1000;
     document.body.appendChild(mensagem);
-
-    setTimeout(() => {
-      mensagem.remove();
-    }, 2000);
+    setTimeout(() => mensagem.remove(), 2000);
   });
-  }
+}
+
+
+
 
 
       function gerarFraseologias() {
